@@ -21,11 +21,12 @@ export function useCapacityOverview(
   const { data, status, error, refresh } = useFetch<CapacityOverview>(
     "/api/v1/capacity-overview",
     {
+      key: "capacity-overview",
       baseURL: config.public.apiBase,
       query: computed(() => ({ month: toValue(month) ?? undefined })),
     },
   );
-  console.log(data.value);
+
   const summary = computed(() => (data.value ? summarize(data.value) : null));
 
   const isLoading = computed(() => status.value === "pending");

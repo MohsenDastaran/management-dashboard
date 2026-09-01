@@ -20,6 +20,40 @@ export function formatMonth(month: YearMonth): string {
   })
 }
 
+/** "2025-09-14" -> "Sep 14, 2025" */
+export function formatDate(date: string): string {
+  return new Date(`${date}T00:00:00`).toLocaleDateString('en', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
+/** Age in whole months/years at a reference date, e.g. "8mo" or "3y 4mo". */
+export function formatAge(dateOfBirth: string, onDate: string): string {
+  const dob = new Date(`${dateOfBirth}T00:00:00`)
+  const ref = new Date(`${onDate}T00:00:00`)
+  let months
+    = (ref.getFullYear() - dob.getFullYear()) * 12
+      + (ref.getMonth() - dob.getMonth())
+  if (ref.getDate() < dob.getDate()) {
+    months--
+  }
+  if (months < 0) {
+    return 'not born yet'
+  }
+  const years = Math.floor(months / 12)
+  const rest = months % 12
+  if (years === 0) {
+    return `${rest}mo`
+  }
+  return rest === 0 ? `${years}y` : `${years}y ${rest}mo`
+}
+
+export function initials(firstName: string, lastName: string): string {
+  return `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase()
+}
+
 export type UtilizationTone = 'ok' | 'high' | 'over'
 
 /** Traffic-light bucket for a utilization ratio (1 = full). */
