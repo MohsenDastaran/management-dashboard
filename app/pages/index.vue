@@ -35,7 +35,7 @@ const kpis = computed(() => {
       tone: 'default' as const,
     },
     {
-      label: 'Utilization',
+      label: 'Utilisation',
       value: formatPercent(s.utilization),
       icon: Gauge,
       hint: 'occupied / total places',

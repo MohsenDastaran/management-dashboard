@@ -56,7 +56,7 @@ const needsAttention = computed(
         <UiProgress
           :model-value="progressValue"
           :class="utilizationBarClass[tone]"
-          :aria-label="`${summary.centre.name} utilization`"
+          :aria-label="`${summary.centre.name} utilisation`"
         />
         <div class="text-muted-foreground mt-1.5 flex justify-between text-xs tabular-nums">
           <span>

@@ -56,7 +56,7 @@ const rows = computed<Row[]>(() => {
   <UiCard size="sm" class="gap-4">
     <UiCardHeader>
       <UiCardTitle class="text-sm">
-        Utilization
+        Utilisation
       </UiCardTitle>
       <UiCardDescription class="text-xs">
         Occupied share of physical places.

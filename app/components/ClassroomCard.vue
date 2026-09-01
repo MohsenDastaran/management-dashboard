@@ -98,7 +98,7 @@ const hasIssues = computed(
             Math.min(100, Math.round((room.utilization ?? 0) * 100))
           "
           :class="utilizationBarClass[tone]"
-          :aria-label="`Room ${room.classroom.name} utilization`"
+          :aria-label="`Room ${room.classroom.name} utilisation`"
         />
         <div
           class="text-muted-foreground mt-1.5 flex justify-between text-xs tabular-nums"

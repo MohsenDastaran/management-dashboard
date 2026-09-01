@@ -5,7 +5,7 @@ export function formatPercent(value: number | null): string {
   if (value === null) {
     return '—'
   }
-  return new Intl.NumberFormat('en', {
+  return new Intl.NumberFormat('en-GB', {
     style: 'percent',
     maximumFractionDigits: 1,
   }).format(value)
@@ -21,7 +21,7 @@ export function currentYearMonth(now = new Date()): YearMonth {
 /** "2026-09" -> "September 2026" */
 export function formatMonth(month: YearMonth): string {
   const [year, monthNumber] = month.split('-').map(Number)
-  return new Date(year!, monthNumber! - 1, 1).toLocaleDateString('en', {
+  return new Date(year!, monthNumber! - 1, 1).toLocaleDateString('en-GB', {
     month: 'long',
     year: 'numeric',
   })
@@ -29,9 +29,9 @@ export function formatMonth(month: YearMonth): string {
 
 /** "2025-09-14" -> "Sep 14, 2025" */
 export function formatDate(date: string): string {
-  return new Date(`${date}T00:00:00`).toLocaleDateString('en', {
-    month: 'short',
+  return new Date(`${date}T00:00:00`).toLocaleDateString('en-GB', {
     day: 'numeric',
+    month: 'short',
     year: 'numeric',
   })
 }
