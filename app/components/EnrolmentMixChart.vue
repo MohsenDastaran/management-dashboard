@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { AgeGroup, AttendanceType } from '~/types/capacity'
 import type { CentreSummary } from '~/lib/capacity'
+import { formatPercent } from '~/lib/format'
 
 const props = defineProps<{
   centres: CentreSummary[]
@@ -102,21 +103,32 @@ const legend = computed(() =>
               {{ row.total }} {{ row.total === 1 ? 'child' : 'children' }}
             </span>
           </div>
-          <div
-            v-if="row.total > 0"
-            class="flex h-3 gap-px overflow-hidden rounded-full"
-            role="img"
-            :aria-label="`${row.centre.name} enrolment breakdown`"
-          >
             <div
-              v-for="segment in row.segments.filter(s => s.count > 0)"
-              :key="segment.id"
-              class="h-full transition-[width] duration-500 ease-out first:rounded-l-full last:rounded-r-full"
-              :class="segment.colorClass"
-              :style="{ width: `${segment.percent}%` }"
-              :title="`${segment.label}: ${segment.count}`"
-            />
-          </div>
+              v-if="row.total > 0"
+              class="flex h-3 gap-px overflow-hidden rounded-full"
+              role="img"
+              :aria-label="`${row.centre.name} enrolment breakdown`"
+            >
+              <UiTooltip
+                v-for="segment in row.segments.filter(s => s.count > 0)"
+                :key="segment.id"
+              >
+                <UiTooltipTrigger as-child>
+                  <div
+                    class="h-full cursor-default transition-[width] duration-500 ease-out first:rounded-l-full last:rounded-r-full"
+                    :class="segment.colorClass"
+                    :style="{ width: `${segment.percent}%` }"
+                  />
+                </UiTooltipTrigger>
+                <UiTooltipContent side="top">
+                  <span class="size-2 shrink-0 rounded-[2px]" :class="segment.colorClass" />
+                  {{ segment.label }}
+                  <span class="opacity-70 tabular-nums">
+                    {{ segment.count }} · {{ formatPercent(segment.percent / 100) }}
+                  </span>
+                </UiTooltipContent>
+              </UiTooltip>
+            </div>
           <div v-else class="bg-muted h-3 rounded-full" />
         </div>
       </div>

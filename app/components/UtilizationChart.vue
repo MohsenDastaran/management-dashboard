@@ -98,17 +98,28 @@ const rows = computed<Row[]>(() => {
               </span>
             </span>
           </div>
-          <div
-            class="bg-muted h-2.5 overflow-hidden rounded-full"
-            role="img"
-            :aria-label="`${row.label}: ${row.occupied} of ${row.capacity} places occupied`"
-          >
-            <div
-              class="h-full rounded-full transition-[width] duration-700 ease-out"
-              :class="barClass[utilizationTone(row.utilization)]"
-              :style="{ width: `${Math.min(100, (row.utilization ?? 0) * 100)}%` }"
-            />
-          </div>
+          <UiTooltip>
+            <UiTooltipTrigger as-child>
+              <div
+                class="bg-muted h-2.5 cursor-default overflow-hidden rounded-full"
+                role="img"
+                :aria-label="`${row.label}: ${row.occupied} of ${row.capacity} places occupied`"
+              >
+                <div
+                  class="h-full rounded-full transition-[width] duration-700 ease-out"
+                  :class="barClass[utilizationTone(row.utilization)]"
+                  :style="{ width: `${Math.min(100, (row.utilization ?? 0) * 100)}%` }"
+                />
+              </div>
+            </UiTooltipTrigger>
+            <UiTooltipContent side="top">
+              {{ row.label }}
+              <span v-if="row.sublabel" class="opacity-70">{{ row.sublabel }}</span>
+              <span class="opacity-70 tabular-nums">
+                {{ row.occupied }}/{{ row.capacity }} · {{ formatPercent(row.utilization) }}
+              </span>
+            </UiTooltipContent>
+          </UiTooltip>
         </div>
       </div>
     </UiCardContent>
