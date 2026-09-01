@@ -12,5 +12,7 @@ const { isDark } = useTheme()
       </div>
     </UiSidebarInset>
   </UiSidebarProvider>
-  <UiSonner :theme="isDark ? 'dark' : 'light'" position="bottom-right" />
+  <ClientOnly>
+    <UiSonner :theme="isDark ? 'dark' : 'light'" position="bottom-right" />
+  </ClientOnly>
 </template>
