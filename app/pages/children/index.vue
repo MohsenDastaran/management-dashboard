@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import type { Enrolment } from '~/types/capacity'
 import {
-  CircleAlert,
   Inbox,
-  RefreshCw,
   Search,
   UserX,
 } from '@lucide/vue'
@@ -16,7 +14,7 @@ interface ChildRow {
   isMismatch: boolean
 }
 
-const { data, summary, isLoading, isEmpty, error, refresh } = useCapacityOverview()
+const { data, summary, isLoading, isEmpty, error } = useCapacityOverview()
 
 const tab = ref<'unassigned' | 'all'>('unassigned')
 const search = ref('')
@@ -99,19 +97,7 @@ const effectiveOn = computed(() => data.value?.meta.effective_on ?? '')
     </template>
 
     <!-- Error -->
-    <UiAlert v-else-if="error" variant="destructive">
-      <CircleAlert />
-      <UiAlertTitle>Couldn't load enrolment data</UiAlertTitle>
-      <UiAlertDescription>
-        {{ error.statusMessage || error.message || 'The request failed. Check your connection and try again.' }}
-      </UiAlertDescription>
-      <UiAlertAction>
-        <UiButton variant="outline" size="sm" @click="refresh()">
-          <RefreshCw />
-          Retry
-        </UiButton>
-      </UiAlertAction>
-    </UiAlert>
+    <DataErrorAlert v-else-if="error" title="Couldn't load enrolment data" />
 
     <!-- Empty -->
     <div

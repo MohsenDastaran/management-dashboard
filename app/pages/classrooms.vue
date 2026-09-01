@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import type { CentreSummary, ClassroomSummary } from '~/lib/capacity'
 import {
-  CircleAlert,
   Inbox,
-  RefreshCw,
   SearchX,
   TriangleAlert,
 } from '@lucide/vue'
@@ -16,7 +14,7 @@ interface CentreGroup {
 
 const route = useRoute()
 const router = useRouter()
-const { data, summary, isLoading, isEmpty, error, refresh } = useCapacityOverview()
+const { data, summary, isLoading, isEmpty, error } = useCapacityOverview()
 
 const centreFilter = ref<string>(
   typeof route.query.centre === 'string' ? route.query.centre : 'all',
@@ -94,19 +92,7 @@ function clearFilters() {
     </template>
 
     <!-- Error -->
-    <UiAlert v-else-if="error" variant="destructive">
-      <CircleAlert />
-      <UiAlertTitle>Couldn't load classroom data</UiAlertTitle>
-      <UiAlertDescription>
-        {{ error.statusMessage || error.message || 'The request failed. Check your connection and try again.' }}
-      </UiAlertDescription>
-      <UiAlertAction>
-        <UiButton variant="outline" size="sm" @click="refresh()">
-          <RefreshCw />
-          Retry
-        </UiButton>
-      </UiAlertAction>
-    </UiAlert>
+    <DataErrorAlert v-else-if="error" title="Couldn't load classroom data" />
 
     <!-- Empty -->
     <div

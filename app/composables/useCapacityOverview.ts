@@ -7,23 +7,30 @@ import type {
 import { summarize } from "~/lib/capacity";
 
 /**
- * Fetches the capacity overview for a reporting month and exposes the raw
- * payload plus the derived summary from the capacity engine.
- *
- * Pass a ref/getter as `month` to make the query reactive; `null`/`undefined`
- * omits the parameter so the API uses the current reporting month.
+ * App-wide selected reporting month. `null` means "use the API's current
+ * reporting month" (the `month` query parameter is omitted).
  */
-export function useCapacityOverview(
-  month?: MaybeRefOrGetter<YearMonth | null | undefined>,
-) {
+export function useReportingMonth() {
+  return useState<YearMonth | null>("reporting-month", () => null);
+}
+
+/**
+ * Fetches the capacity overview for the selected reporting month and exposes
+ * the raw payload plus the derived summary from the capacity engine.
+ *
+ * All callers share one fetch (same key) driven by `useReportingMonth`, so
+ * changing the month in the navbar refetches for every page.
+ */
+export function useCapacityOverview() {
   const config = useRuntimeConfig();
+  const month = useReportingMonth();
 
   const { data, status, error, refresh } = useFetch<CapacityOverview>(
     "/api/v1/capacity-overview",
     {
       key: "capacity-overview",
       baseURL: config.public.apiBase,
-      query: computed(() => ({ month: toValue(month) ?? undefined })),
+      query: computed(() => ({ month: month.value ?? undefined })),
     },
   );
 

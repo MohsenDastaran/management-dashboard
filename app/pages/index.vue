@@ -1,18 +1,16 @@
 <script setup lang="ts">
 import {
   CalendarDays,
-  CircleAlert,
   DoorOpen,
   Gauge,
   Inbox,
-  RefreshCw,
   TriangleAlert,
   Users,
   UserX,
 } from '@lucide/vue'
 import { formatMonth, formatPercent } from '~/lib/format'
 
-const { data, summary, isLoading, isEmpty, error, refresh } = useCapacityOverview()
+const { data, summary, isLoading, isEmpty, error } = useCapacityOverview()
 
 const kpis = computed(() => {
   if (!summary.value) {
@@ -83,25 +81,16 @@ const kpis = computed(() => {
       <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
         <UiSkeleton v-for="n in 5" :key="n" class="h-28 rounded-xl" />
       </div>
+      <div class="grid gap-4 lg:grid-cols-2">
+        <UiSkeleton v-for="n in 2" :key="n" class="h-64 rounded-xl" />
+      </div>
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <UiSkeleton v-for="n in 4" :key="n" class="h-44 rounded-xl" />
       </div>
     </template>
 
     <!-- Error -->
-    <UiAlert v-else-if="error" variant="destructive">
-      <CircleAlert />
-      <UiAlertTitle>Couldn't load capacity data</UiAlertTitle>
-      <UiAlertDescription>
-        {{ error.statusMessage || error.message || 'The request failed. Check your connection and try again.' }}
-      </UiAlertDescription>
-      <UiAlertAction>
-        <UiButton variant="outline" size="sm" @click="refresh()">
-          <RefreshCw />
-          Retry
-        </UiButton>
-      </UiAlertAction>
-    </UiAlert>
+    <DataErrorAlert v-else-if="error" title="Couldn't load capacity data" />
 
     <!-- Empty -->
     <div
@@ -126,6 +115,15 @@ const kpis = computed(() => {
           v-for="kpi in kpis"
           :key="kpi.label"
           v-bind="kpi"
+        />
+      </section>
+
+      <section aria-label="Insights" class="grid gap-4 lg:grid-cols-2">
+        <UtilizationChart :centres="summary.centres" />
+        <EnrolmentMixChart
+          :centres="summary.centres"
+          :age-groups="data?.age_groups ?? []"
+          :attendance-types="data?.attendance_types ?? []"
         />
       </section>
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { CircleAlert, Inbox, RefreshCw } from '@lucide/vue'
+import { Inbox } from '@lucide/vue'
 
-const { summary, isLoading, isEmpty, error, refresh } = useCapacityOverview()
+const { summary, isLoading, isEmpty, error } = useCapacityOverview()
 </script>
 
 <template>
@@ -22,19 +22,7 @@ const { summary, isLoading, isEmpty, error, refresh } = useCapacityOverview()
     </div>
 
     <!-- Error -->
-    <UiAlert v-else-if="error" variant="destructive">
-      <CircleAlert />
-      <UiAlertTitle>Couldn't load centre data</UiAlertTitle>
-      <UiAlertDescription>
-        {{ error.statusMessage || error.message || 'The request failed. Check your connection and try again.' }}
-      </UiAlertDescription>
-      <UiAlertAction>
-        <UiButton variant="outline" size="sm" @click="refresh()">
-          <RefreshCw />
-          Retry
-        </UiButton>
-      </UiAlertAction>
-    </UiAlert>
+    <DataErrorAlert v-else-if="error" title="Couldn't load centre data" />
 
     <!-- Empty -->
     <div
