@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ClassroomSummary } from "~/lib/capacity";
-import { ChevronDown, CircleCheck, TriangleAlert } from "@lucide/vue";
+import type { AgeGroup } from "~/types/capacity";
+import { ChevronDown, CircleCheck, Pencil, TriangleAlert } from "@lucide/vue";
 import {
   formatPercent,
   initials,
@@ -13,9 +14,11 @@ const props = defineProps<{
   room: ClassroomSummary;
   ageGroupLabels: Map<string, string>;
   attendanceAbbr: Map<string, string>;
+  ageGroups: AgeGroup[];
 }>();
 
 const open = ref(false);
+const editing = ref(false);
 
 const tone = computed(() => utilizationTone(props.room.utilization));
 
@@ -52,7 +55,16 @@ const hasIssues = computed(
             Capacity {{ room.classroom.capacity }}
           </p>
         </div>
-        <div class="flex shrink-0 flex-wrap justify-end gap-1">
+        <div class="flex shrink-0 flex-wrap items-center justify-end gap-1">
+          <UiButton
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Edit classroom"
+            class="cursor-pointer"
+            @click.stop="editing = true"
+          >
+            <Pencil class="size-3.5" />
+          </UiButton>
           <UiBadge v-if="room.isOverCapacity" variant="destructive">
             <TriangleAlert />
             Over capacity
@@ -193,4 +205,10 @@ const hasIssues = computed(
       </UiCollapsible>
     </div>
   </UiCard>
+
+  <EditClassroomModal
+    v-model:open="editing"
+    :room="room"
+    :age-groups="ageGroups"
+  />
 </template>

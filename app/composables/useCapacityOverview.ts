@@ -4,7 +4,7 @@ import type {
   ValidationError,
   YearMonth,
 } from "~/types/capacity";
-import { summarize } from "~/lib/capacity";
+import { applyLocalEdits, summarize } from "~/lib/capacity";
 
 /**
  * App-wide selected reporting month. `null` means "use the API's current
@@ -25,7 +25,9 @@ export function useCapacityOverview() {
   const config = useRuntimeConfig();
   const month = useReportingMonth();
 
-  const { data, status, error, refresh } = useAsyncData(
+  const { edits } = useLocalEdits();
+
+  const { data: raw, status, error, refresh } = useAsyncData(
     computed(() => `capacity-overview-${month.value ?? "current"}`),
     (_nuxtApp, { signal }) =>
       $fetch<CapacityOverview>("/api/v1/capacity-overview", {
@@ -39,6 +41,10 @@ export function useCapacityOverview() {
       dedupe: "defer",
       deep: false,
     },
+  );
+
+  const data = computed(() =>
+    raw.value ? applyLocalEdits(raw.value, edits.value) : null,
   );
 
   const summary = computed(() => (data.value ? summarize(data.value) : null));

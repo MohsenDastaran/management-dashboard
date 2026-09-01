@@ -2,7 +2,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
   ssr: false,
-  css: ["~/assets/css/tailwind.css"],
+  css: ["~/assets/css/tailwind.css", "vue-sonner/style.css"],
   compatibilityDate: "2025-01-01",
   runtimeConfig: {
     public: {

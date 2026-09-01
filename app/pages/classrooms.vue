@@ -196,6 +196,7 @@ function clearFilters() {
             :room="room"
             :age-group-labels="ageGroupLabels"
             :attendance-abbr="attendanceAbbr"
+            :age-groups="data?.age_groups ?? []"
           />
         </div>
       </section>

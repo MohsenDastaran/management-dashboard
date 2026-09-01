@@ -13,12 +13,87 @@
  */
 
 import type {
+  AgeGroupId,
+  AttendanceTypeId,
   CapacityOverview,
   Centre,
   Classroom,
   Enrolment,
   IsoDate,
 } from '../types/capacity'
+
+export interface ClassroomEdit {
+  name?: string
+  capacity?: number
+  accepted_age_group_ids?: AgeGroupId[]
+}
+
+export interface EnrolmentEdit {
+  age_group?: AgeGroupId
+  attendance_type?: AttendanceTypeId
+  /** `null` unassigns the child. Omit to leave the assignment unchanged. */
+  classroom_id?: string | null
+}
+
+export interface LocalEdits {
+  classrooms: Record<string, ClassroomEdit>
+  enrolments: Record<string, EnrolmentEdit>
+}
+
+export function emptyEdits(): LocalEdits {
+  return { classrooms: {}, enrolments: {} }
+}
+
+/** Overlay in-memory edits onto a raw overview payload. Pure; no Vue. */
+export function applyLocalEdits(
+  payload: CapacityOverview,
+  edits: LocalEdits,
+): CapacityOverview {
+  const classrooms = payload.classrooms.map((classroom) => {
+    const edit = edits.classrooms[classroom.id]
+    if (!edit) {
+      return classroom
+    }
+    return {
+      ...classroom,
+      name: edit.name ?? classroom.name,
+      capacity: edit.capacity ?? classroom.capacity,
+      accepted_age_group_ids:
+        edit.accepted_age_group_ids ?? classroom.accepted_age_group_ids,
+    }
+  })
+
+  const enrolments = payload.enrolments.map((enrolment) => {
+    const edit = edits.enrolments[enrolment.id]
+    if (!edit) {
+      return enrolment
+    }
+
+    let assignment = enrolment.assignment
+    if ('classroom_id' in edit) {
+      if (edit.classroom_id === null || edit.classroom_id === undefined) {
+        assignment = null
+      }
+      else {
+        assignment = {
+          id: enrolment.assignment?.id ?? enrolment.id,
+          classroom_id: edit.classroom_id,
+          starts_on: enrolment.assignment?.starts_on ?? enrolment.starts_on,
+          ends_on: enrolment.assignment?.ends_on ?? null,
+        }
+      }
+    }
+
+    return {
+      ...enrolment,
+      age_group: edit.age_group ?? enrolment.age_group,
+      attendance_type: edit.attendance_type ?? enrolment.attendance_type,
+      assignment,
+    }
+  })
+
+  return { ...payload, classrooms, enrolments }
+}
 
 export interface AttendanceCounts {
   fullTime: number

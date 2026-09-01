@@ -1,3 +1,7 @@
+<script setup lang="ts">
+const { isDark } = useTheme()
+</script>
+
 <template>
   <UiSidebarProvider>
     <AppSidebar />
@@ -8,4 +12,5 @@
       </div>
     </UiSidebarInset>
   </UiSidebarProvider>
+  <UiSonner :theme="isDark ? 'dark' : 'light'" position="bottom-right" />
 </template>

@@ -2,6 +2,7 @@
 import type { Enrolment } from '~/types/capacity'
 import {
   Inbox,
+  Pencil,
   Search,
   UserX,
 } from '@lucide/vue'
@@ -9,6 +10,7 @@ import { formatAge, formatDate, initials } from '~/lib/format'
 
 interface ChildRow {
   enrolment: Enrolment
+  centreId: string
   centreName: string
   roomName: string | null
   isMismatch: boolean
@@ -30,6 +32,7 @@ const allRows = computed<ChildRow[]>(() => {
       for (const enrolment of room.enrolments) {
         rows.push({
           enrolment,
+          centreId: centre.centre.id,
           centreName: centre.centre.name,
           roomName: room.classroom.name,
           isMismatch: mismatches.has(enrolment.id),
@@ -39,6 +42,7 @@ const allRows = computed<ChildRow[]>(() => {
     for (const enrolment of centre.unassigned) {
       rows.push({
         enrolment,
+        centreId: centre.centre.id,
         centreName: centre.centre.name,
         roomName: null,
         isMismatch: false,
@@ -73,6 +77,23 @@ const attendanceLabel = computed(
 )
 
 const effectiveOn = computed(() => data.value?.meta.effective_on ?? '')
+
+const editing = ref<Enrolment | null>(null)
+const editorOpen = ref(false)
+
+const editorClassrooms = computed(() => {
+  if (!editing.value || !data.value) {
+    return []
+  }
+  return data.value.classrooms.filter(
+    classroom => classroom.centre_id === editing.value!.centre_id,
+  )
+})
+
+function openEditor(enrolment: Enrolment) {
+  editing.value = enrolment
+  editorOpen.value = true
+}
 </script>
 
 <template>
@@ -166,13 +187,16 @@ const effectiveOn = computed(() => data.value?.meta.effective_on ?? '')
                 Centre
               </UiTableHead>
               <UiTableHead>Classroom</UiTableHead>
-              <UiTableHead class="hidden pr-4 lg:table-cell">
+              <UiTableHead class="hidden lg:table-cell">
                 Enrolled since
+              </UiTableHead>
+              <UiTableHead class="w-12 pr-4">
+                <span class="sr-only">Edit</span>
               </UiTableHead>
             </UiTableRow>
           </UiTableHeader>
           <UiTableBody>
-            <UiTableEmpty v-if="visibleRows.length === 0" :colspan="6">
+            <UiTableEmpty v-if="visibleRows.length === 0" :colspan="7">
               <span class="text-muted-foreground">
                 <template v-if="tab === 'unassigned' && !search">
                   Every child has a classroom assignment this month.
@@ -233,13 +257,33 @@ const effectiveOn = computed(() => data.value?.meta.effective_on ?? '')
                   Unassigned
                 </UiBadge>
               </UiTableCell>
-              <UiTableCell class="text-muted-foreground hidden pr-4 text-xs tabular-nums lg:table-cell">
+              <UiTableCell class="text-muted-foreground hidden text-xs tabular-nums lg:table-cell">
                 {{ formatDate(row.enrolment.starts_on) }}
+              </UiTableCell>
+              <UiTableCell class="pr-4">
+                <UiButton
+                  variant="ghost"
+                  class="cursor-pointer"
+                  size="icon-sm"
+                  aria-label="Edit enrolment"
+                  @click="openEditor(row.enrolment)"
+                >
+                  <Pencil class="size-3.5" />
+                </UiButton>
               </UiTableCell>
             </UiTableRow>
           </UiTableBody>
         </UiTable>
       </UiCard>
+
+      <EditChildModal
+        v-if="editing"
+        v-model:open="editorOpen"
+        :enrolment="editing"
+        :age-groups="data?.age_groups ?? []"
+        :attendance-types="data?.attendance_types ?? []"
+        :classrooms="editorClassrooms"
+      />
     </template>
   </div>
 </template>
