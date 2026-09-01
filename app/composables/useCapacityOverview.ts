@@ -5,6 +5,7 @@ import type {
   YearMonth,
 } from "~/types/capacity";
 import { applyLocalEdits, summarize } from "~/lib/capacity";
+import { getCapacityPayloadError } from "~/lib/editValidation";
 
 /**
  * App-wide selected reporting month. `null` means "use the API's current
@@ -43,11 +44,49 @@ export function useCapacityOverview() {
     },
   );
 
-  const data = computed(() =>
-    raw.value ? applyLocalEdits(raw.value, edits.value) : null,
-  );
+  const processed = computed(() => {
+    if (!raw.value) {
+      return {
+        data: null as CapacityOverview | null,
+        summary: null,
+        processingError: null as string | null,
+      };
+    }
 
-  const summary = computed(() => (data.value ? summarize(data.value) : null));
+    const payloadError = getCapacityPayloadError(raw.value);
+    if (payloadError) {
+      return { data: null, summary: null, processingError: payloadError };
+    }
+
+    try {
+      const patched = applyLocalEdits(raw.value, edits.value);
+      return {
+        data: patched,
+        summary: summarize(patched),
+        processingError: null,
+      };
+    } catch {
+      try {
+        return {
+          data: raw.value,
+          summary: summarize(raw.value),
+          processingError:
+            "Local edits could not be applied because the data is not valid. Changes were ignored.",
+        };
+      } catch {
+        return {
+          data: null,
+          summary: null,
+          processingError:
+            "Capacity data could not be processed. Check the response and try again.",
+        };
+      }
+    }
+  });
+
+  const data = computed(() => processed.value.data);
+  const summary = computed(() => processed.value.summary);
+  const processingError = computed(() => processed.value.processingError);
 
   const isLoading = computed(() => status.value === "pending");
 
@@ -80,6 +119,7 @@ export function useCapacityOverview() {
     isLoading,
     isEmpty,
     monthError,
+    processingError,
     availableMonths,
     refresh,
   };

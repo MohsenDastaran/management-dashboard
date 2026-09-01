@@ -16,7 +16,7 @@ interface ChildRow {
   isMismatch: boolean
 }
 
-const { data, summary, isLoading, isEmpty, error, monthError, refresh } = useCapacityOverview()
+const { data, summary, isLoading, isEmpty, error, monthError, processingError, refresh } = useCapacityOverview()
 
 const tab = ref<'unassigned' | 'all'>('unassigned')
 const search = ref('')
@@ -119,10 +119,11 @@ function openEditor(enrolment: Enrolment) {
 
     <!-- Error -->
     <DataErrorAlert
-      v-else-if="error"
+      v-else-if="error || processingError"
       title="Couldn't load enrolment data"
       :error="error"
       :month-error="monthError"
+      :message="processingError"
       @retry="refresh()"
     />
 

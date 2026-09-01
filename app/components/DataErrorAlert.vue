@@ -7,6 +7,8 @@ defineProps<{
   title: string
   error?: FetchError | Error | null
   monthError?: string | null
+  /** Invalid payload or processing failure after a successful fetch. */
+  message?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -21,10 +23,11 @@ const selectedMonth = useReportingMonth()
     <CalendarX2 v-if="monthError" />
     <CircleAlert v-else />
     <UiAlertTitle>
-      {{ monthError ? 'Reporting month unavailable' : title }}
+      {{ monthError ? 'Reporting month unavailable' : message ? 'Capacity data is not valid' : title }}
     </UiAlertTitle>
     <UiAlertDescription>
       {{ monthError
+        || message
         || (error && 'statusMessage' in error ? error.statusMessage : null)
         || error?.message
         || 'The request failed. Check your connection and try again.' }}

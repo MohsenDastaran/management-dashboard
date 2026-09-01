@@ -44,11 +44,29 @@ export function emptyEdits(): LocalEdits {
   return { classrooms: {}, enrolments: {} }
 }
 
+function isUsableClassroomName(name: string | undefined): name is string {
+  return typeof name === 'string' && name.trim().length > 0
+}
+
+function isUsableCapacity(capacity: number | undefined): capacity is number {
+  return typeof capacity === 'number' && Number.isInteger(capacity) && capacity >= 0
+}
+
+function isUsableAgeGroups(
+  ids: AgeGroupId[] | undefined,
+): ids is AgeGroupId[] {
+  return Array.isArray(ids) && ids.length > 0
+}
+
 /** Overlay in-memory edits onto a raw overview payload. Pure; no Vue. */
 export function applyLocalEdits(
   payload: CapacityOverview,
   edits: LocalEdits,
 ): CapacityOverview {
+  const knownAgeGroups = new Set(payload.age_groups.map(group => group.id))
+  const knownAttendance = new Set(payload.attendance_types.map(type => type.id))
+  const classroomIds = new Set(payload.classrooms.map(room => room.id))
+
   const classrooms = payload.classrooms.map((classroom) => {
     const edit = edits.classrooms[classroom.id]
     if (!edit) {
@@ -56,10 +74,11 @@ export function applyLocalEdits(
     }
     return {
       ...classroom,
-      name: edit.name ?? classroom.name,
-      capacity: edit.capacity ?? classroom.capacity,
-      accepted_age_group_ids:
-        edit.accepted_age_group_ids ?? classroom.accepted_age_group_ids,
+      name: isUsableClassroomName(edit.name) ? edit.name.trim() : classroom.name,
+      capacity: isUsableCapacity(edit.capacity) ? edit.capacity : classroom.capacity,
+      accepted_age_group_ids: isUsableAgeGroups(edit.accepted_age_group_ids)
+        ? edit.accepted_age_group_ids
+        : classroom.accepted_age_group_ids,
     }
   })
 
@@ -74,7 +93,7 @@ export function applyLocalEdits(
       if (edit.classroom_id === null || edit.classroom_id === undefined) {
         assignment = null
       }
-      else {
+      else if (classroomIds.has(edit.classroom_id)) {
         assignment = {
           id: enrolment.assignment?.id ?? enrolment.id,
           classroom_id: edit.classroom_id,
@@ -84,10 +103,17 @@ export function applyLocalEdits(
       }
     }
 
+    const ageGroup = edit.age_group && knownAgeGroups.has(edit.age_group)
+      ? edit.age_group
+      : enrolment.age_group
+    const attendanceType = edit.attendance_type && knownAttendance.has(edit.attendance_type)
+      ? edit.attendance_type
+      : enrolment.attendance_type
+
     return {
       ...enrolment,
-      age_group: edit.age_group ?? enrolment.age_group,
-      attendance_type: edit.attendance_type ?? enrolment.attendance_type,
+      age_group: ageGroup,
+      attendance_type: attendanceType,
       assignment,
     }
   })

@@ -14,7 +14,7 @@ interface CentreGroup {
 
 const route = useRoute()
 const router = useRouter()
-const { data, summary, isLoading, isEmpty, error, monthError, refresh } = useCapacityOverview()
+const { data, summary, isLoading, isEmpty, error, monthError, processingError, refresh } = useCapacityOverview()
 
 const centreFilter = ref<string>(
   typeof route.query.centre === 'string' ? route.query.centre : 'all',
@@ -93,10 +93,11 @@ function clearFilters() {
 
     <!-- Error -->
     <DataErrorAlert
-      v-else-if="error"
+      v-else-if="error || processingError"
       title="Couldn't load classroom data"
       :error="error"
       :month-error="monthError"
+      :message="processingError"
       @retry="refresh()"
     />
 
