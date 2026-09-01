@@ -148,7 +148,7 @@ const hasIssues = computed(
         <UiCollapsibleContent>
           <div
             v-if="room.enrolments.length"
-            class="flex flex-wrap gap-1.5 pt-2.5"
+            class="mt-2.5 flex max-h-36 flex-wrap content-start gap-1.5 overflow-y-auto overscroll-contain pr-0.5"
           >
             <span
               v-for="enrolment in room.enrolments"
