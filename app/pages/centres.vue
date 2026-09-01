@@ -1,11 +1,10 @@
 <template>
   <div class="space-y-2">
     <h1 class="text-2xl font-semibold tracking-tight">
-      Overview
+      Centres
     </h1>
     <p class="text-muted-foreground max-w-2xl text-sm">
-      Centre and classroom capacity will appear here in later steps.
-      Use the sidebar to move around the dashboard.
+      Per-centre summaries land in Step 3.
     </p>
   </div>
 </template>
