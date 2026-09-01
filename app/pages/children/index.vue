@@ -14,7 +14,7 @@ interface ChildRow {
   isMismatch: boolean
 }
 
-const { data, summary, isLoading, isEmpty, error } = useCapacityOverview()
+const { data, summary, isLoading, isEmpty, error, monthError, refresh } = useCapacityOverview()
 
 const tab = ref<'unassigned' | 'all'>('unassigned')
 const search = ref('')
@@ -97,7 +97,13 @@ const effectiveOn = computed(() => data.value?.meta.effective_on ?? '')
     </template>
 
     <!-- Error -->
-    <DataErrorAlert v-else-if="error" title="Couldn't load enrolment data" />
+    <DataErrorAlert
+      v-else-if="error"
+      title="Couldn't load enrolment data"
+      :error="error"
+      :month-error="monthError"
+      @retry="refresh()"
+    />
 
     <!-- Empty -->
     <div

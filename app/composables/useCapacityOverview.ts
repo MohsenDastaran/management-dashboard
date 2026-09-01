@@ -18,19 +18,26 @@ export function useReportingMonth() {
  * Fetches the capacity overview for the selected reporting month and exposes
  * the raw payload plus the derived summary from the capacity engine.
  *
- * All callers share one fetch (same key) driven by `useReportingMonth`, so
- * changing the month in the navbar refetches for every page.
+ * Uses `useAsyncData` (not `useFetch`) so a reactive query object cannot
+ * deep-watch itself into a request loop. Callers share one request per month.
  */
 export function useCapacityOverview() {
   const config = useRuntimeConfig();
   const month = useReportingMonth();
 
-  const { data, status, error, refresh } = useFetch<CapacityOverview>(
-    "/api/v1/capacity-overview",
+  const { data, status, error, refresh } = useAsyncData(
+    computed(() => `capacity-overview-${month.value ?? "current"}`),
+    (_nuxtApp, { signal }) =>
+      $fetch<CapacityOverview>("/api/v1/capacity-overview", {
+        baseURL: config.public.apiBase,
+        query: month.value ? { month: month.value } : undefined,
+        retry: false,
+        signal,
+      }),
     {
-      key: "capacity-overview",
-      baseURL: config.public.apiBase,
-      query: computed(() => ({ month: month.value ?? undefined })),
+      watch: [month],
+      dedupe: "defer",
+      deep: false,
     },
   );
 

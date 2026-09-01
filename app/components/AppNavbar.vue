@@ -6,18 +6,7 @@ const route = useRoute()
 const { isDark, toggle } = useTheme()
 
 const selectedMonth = useReportingMonth()
-const { data, availableMonths, isLoading } = useCapacityOverview()
-
-/**
- * The API's own current reporting month, captured from the first response
- * that was fetched without an explicit month.
- */
-const currentMonth = useState<string | null>('current-reporting-month', () => null)
-watch(data, (payload) => {
-  if (payload && selectedMonth.value === null) {
-    currentMonth.value = payload.meta.month
-  }
-}, { immediate: true })
+const { data, isLoading } = useCapacityOverview()
 
 /** Month shown on the button: explicit selection, else the API's default. */
 const activeMonth = computed(() => selectedMonth.value ?? data.value?.meta.month ?? null)
@@ -25,8 +14,7 @@ const activeMonth = computed(() => selectedMonth.value ?? data.value?.meta.month
 const pickerOpen = ref(false)
 
 function selectMonth(month: string) {
-  // Selecting the API's default month clears the override entirely.
-  selectedMonth.value = month === currentMonth.value ? null : (month as typeof selectedMonth.value)
+  selectedMonth.value = month as typeof selectedMonth.value
   pickerOpen.value = false
 }
 
@@ -88,7 +76,6 @@ const crumbs = computed(() => {
         <UiPopoverContent align="end" class="w-auto p-0">
           <MonthPicker
             :model-value="activeMonth"
-            :available-months="availableMonths"
             @update:model-value="selectMonth"
           />
         </UiPopoverContent>

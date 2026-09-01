@@ -11,6 +11,13 @@ export function formatPercent(value: number | null): string {
   }).format(value)
 }
 
+/** Calendar year-month for today, e.g. "2026-09". */
+export function currentYearMonth(now = new Date()): YearMonth {
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}` as YearMonth
+}
+
 /** "2026-09" -> "September 2026" */
 export function formatMonth(month: YearMonth): string {
   const [year, monthNumber] = month.split('-').map(Number)

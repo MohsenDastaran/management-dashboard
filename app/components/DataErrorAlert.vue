@@ -1,13 +1,19 @@
 <script setup lang="ts">
+import type { FetchError } from 'ofetch'
 import { CalendarX2, CircleAlert, RefreshCw, Undo2 } from '@lucide/vue'
 
 defineProps<{
   /** Title used for generic (non-month) failures. */
   title: string
+  error?: FetchError | Error | null
+  monthError?: string | null
+}>()
+
+const emit = defineEmits<{
+  retry: []
 }>()
 
 const selectedMonth = useReportingMonth()
-const { error, monthError, refresh } = useCapacityOverview()
 </script>
 
 <template>
@@ -19,7 +25,7 @@ const { error, monthError, refresh } = useCapacityOverview()
     </UiAlertTitle>
     <UiAlertDescription>
       {{ monthError
-        || error?.statusMessage
+        || (error && 'statusMessage' in error ? error.statusMessage : null)
         || error?.message
         || 'The request failed. Check your connection and try again.' }}
     </UiAlertDescription>
@@ -33,7 +39,7 @@ const { error, monthError, refresh } = useCapacityOverview()
         <Undo2 />
         Back to current month
       </UiButton>
-      <UiButton v-else variant="outline" size="sm" @click="refresh()">
+      <UiButton v-else variant="outline" size="sm" @click="emit('retry')">
         <RefreshCw />
         Retry
       </UiButton>

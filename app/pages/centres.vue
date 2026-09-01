@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Inbox } from '@lucide/vue'
 
-const { summary, isLoading, isEmpty, error } = useCapacityOverview()
+const { summary, isLoading, isEmpty, error, monthError, refresh } = useCapacityOverview()
 </script>
 
 <template>
@@ -22,7 +22,13 @@ const { summary, isLoading, isEmpty, error } = useCapacityOverview()
     </div>
 
     <!-- Error -->
-    <DataErrorAlert v-else-if="error" title="Couldn't load centre data" />
+    <DataErrorAlert
+      v-else-if="error"
+      title="Couldn't load centre data"
+      :error="error"
+      :month-error="monthError"
+      @retry="refresh()"
+    />
 
     <!-- Empty -->
     <div

@@ -10,7 +10,7 @@ import {
 } from '@lucide/vue'
 import { formatMonth, formatPercent } from '~/lib/format'
 
-const { data, summary, isLoading, isEmpty, error } = useCapacityOverview()
+const { data, summary, isLoading, isEmpty, error, monthError, refresh } = useCapacityOverview()
 
 const kpis = computed(() => {
   if (!summary.value) {
@@ -90,7 +90,13 @@ const kpis = computed(() => {
     </template>
 
     <!-- Error -->
-    <DataErrorAlert v-else-if="error" title="Couldn't load capacity data" />
+    <DataErrorAlert
+      v-else-if="error"
+      title="Couldn't load capacity data"
+      :error="error"
+      :month-error="monthError"
+      @retry="refresh()"
+    />
 
     <!-- Empty -->
     <div

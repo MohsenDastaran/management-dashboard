@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import type { YearMonth } from '~/types/capacity'
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
+import { currentYearMonth } from '~/lib/format'
 
 const props = defineProps<{
   /** Currently active month, highlighted in the grid. */
   modelValue: YearMonth | null
-  /** Only these months are selectable; everything else is disabled. */
-  availableMonths: YearMonth[]
 }>()
 
 const emit = defineEmits<{
@@ -18,25 +17,14 @@ const MONTH_LABELS = [
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ]
 
-const available = computed(() => new Set<string>(props.availableMonths))
-
-const years = computed(() =>
-  props.availableMonths.map(month => Number(month.slice(0, 4))),
-)
-
-const fallbackYear = new Date().getFullYear()
-const minYear = computed(() =>
-  years.value.length ? Math.min(...years.value) : fallbackYear,
-)
-const maxYear = computed(() =>
-  years.value.length ? Math.max(...years.value) : fallbackYear,
-)
+const MIN_YEAR = 2020
+const maxMonth = currentYearMonth()
+const maxYear = Number(maxMonth.slice(0, 4))
 
 const displayYear = ref(
-  Number((props.modelValue ?? props.availableMonths.at(-1))?.slice(0, 4)) || fallbackYear,
+  Number(props.modelValue?.slice(0, 4)) || maxYear,
 )
 
-// Keep the visible year in sync when the selection changes externally.
 watch(() => props.modelValue, (month) => {
   if (month) {
     displayYear.value = Number(month.slice(0, 4))
@@ -45,6 +33,10 @@ watch(() => props.modelValue, (month) => {
 
 function yearMonth(monthIndex: number): YearMonth {
   return `${displayYear.value}-${String(monthIndex + 1).padStart(2, '0')}` as YearMonth
+}
+
+function isDisabled(month: YearMonth): boolean {
+  return month < `${MIN_YEAR}-01` || month > maxMonth
 }
 </script>
 
@@ -55,7 +47,7 @@ function yearMonth(monthIndex: number): YearMonth {
         variant="ghost"
         size="icon-sm"
         aria-label="Previous year"
-        :disabled="displayYear <= minYear"
+        :disabled="displayYear <= MIN_YEAR"
         @click="displayYear--"
       >
         <ChevronLeft class="size-4" />
@@ -81,7 +73,7 @@ function yearMonth(monthIndex: number): YearMonth {
         :class="modelValue === yearMonth(index)
           ? 'bg-primary text-primary-foreground shadow-sm'
           : 'hover:bg-accent/15 hover:text-foreground text-foreground/80'"
-        :disabled="!available.has(yearMonth(index))"
+        :disabled="isDisabled(yearMonth(index))"
         @click="emit('update:modelValue', yearMonth(index))"
       >
         {{ label }}
